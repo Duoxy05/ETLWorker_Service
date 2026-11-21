@@ -99,6 +99,24 @@ CREATE TABLE IF NOT EXISTS etl_ejecucion (
 ) ENGINE=InnoDB;
 
 -- Mínimo privilegio: solo puede insertar, leer y limpiar staging/bitácora (no DROP, no DDL).
-CREATE USER IF NOT EXISTS 'etl_writer'@'localhost' IDENTIFIED BY 'EtlLector20251055';
-GRANT SELECT, INSERT, DELETE ON SistemaOpinionesDW.* TO 'etl_writer'@'localhost';
+CREATE USER IF NOT EXISTS 'etl_writer'@'localhost'
+IDENTIFIED BY RANDOM PASSWORD;
+GRANT INSERT, DELETE ON SistemaOpinionesDW.stg_encuestas
+TO 'etl_writer'@'localhost';
+
+GRANT INSERT, DELETE ON SistemaOpinionesDW.stg_resenas_web
+TO 'etl_writer'@'localhost';
+
+GRANT INSERT, DELETE ON SistemaOpinionesDW.stg_comentarios_sociales
+TO 'etl_writer'@'localhost';
+
+GRANT INSERT ON SistemaOpinionesDW.etl_calidad_datos
+TO 'etl_writer'@'localhost';
+
+GRANT INSERT ON SistemaOpinionesDW.etl_ejecucion
+TO 'etl_writer'@'localhost';
+REVOKE SELECT, INSERT, DELETE ON SistemaOpinionesDW.*
+FROM 'etl_writer'@'localhost';
+
+SHOW GRANTS FOR 'etl_writer'@'localhost';
 FLUSH PRIVILEGES;

@@ -2,7 +2,7 @@
 
 Worker Service en **.NET 8** con Clean Architecture que extrae opiniones de tres fuentes
 (CSV, BD relacional MySQL y API REST) y las deja en tablas *staging* de la BD analítica,
-registrando logs (ILogger + Serilog) y hallazgos de calidad **sin rechazar ninguna fila**.
+registrando logs (ILogger + Serilog) y hallazgos de calidad.
 
 ## Estructura
 | Carpeta | Contenido |

@@ -222,7 +222,8 @@ INSERT INTO web_reviews (IdReview, IdCliente, IdProducto, Fecha, Comentario, Rat
 ('W0200','C006','P015','2024-10-07','Es lo que esperaba, nada excepcional. OK.',3);
 
 -- Principio de mínimo privilegio: el ETL solo puede LEER esta tabla.
-CREATE USER IF NOT EXISTS 'etl_reader'@'localhost' IDENTIFIED BY 'EtlLector20251055';
+CREATE USER IF NOT EXISTS 'etl_reader'@'localhost'
+IDENTIFIED BY RANDOM PASSWORD;
 GRANT SELECT ON OpinionesOrigenDB.web_reviews TO 'etl_reader'@'localhost';
 FLUSH PRIVILEGES;
 
