@@ -1,0 +1,45 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ETLWorker.Domain", "src\ETLWorker.Domain\ETLWorker.Domain.csproj", "{F910CEB8-E554-425E-A536-7B2E0E2226BC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ETLWorker.Application", "src\ETLWorker.Application\ETLWorker.Application.csproj", "{9FA80914-8514-4344-ACC6-3464AEF25D1E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ETLWorker.Infrastructure", "src\ETLWorker.Infrastructure\ETLWorker.Infrastructure.csproj", "{9C883BCC-F687-46C0-83E7-345585CEF974}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ETLWorker.Worker", "src\ETLWorker.Worker\ETLWorker.Worker.csproj", "{90C99042-DC86-4ABE-A2A0-401B13FF2DBE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ETLWorker.MockSocialApi", "src\ETLWorker.MockSocialApi\ETLWorker.MockSocialApi.csproj", "{681FC46D-ACD2-4A5F-95B5-498B29E9EF07}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F910CEB8-E554-425E-A536-7B2E0E2226BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F910CEB8-E554-425E-A536-7B2E0E2226BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F910CEB8-E554-425E-A536-7B2E0E2226BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F910CEB8-E554-425E-A536-7B2E0E2226BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FA80914-8514-4344-ACC6-3464AEF25D1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FA80914-8514-4344-ACC6-3464AEF25D1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FA80914-8514-4344-ACC6-3464AEF25D1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FA80914-8514-4344-ACC6-3464AEF25D1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C883BCC-F687-46C0-83E7-345585CEF974}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C883BCC-F687-46C0-83E7-345585CEF974}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C883BCC-F687-46C0-83E7-345585CEF974}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C883BCC-F687-46C0-83E7-345585CEF974}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90C99042-DC86-4ABE-A2A0-401B13FF2DBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90C99042-DC86-4ABE-A2A0-401B13FF2DBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90C99042-DC86-4ABE-A2A0-401B13FF2DBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90C99042-DC86-4ABE-A2A0-401B13FF2DBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{681FC46D-ACD2-4A5F-95B5-498B29E9EF07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{681FC46D-ACD2-4A5F-95B5-498B29E9EF07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{681FC46D-ACD2-4A5F-95B5-498B29E9EF07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{681FC46D-ACD2-4A5F-95B5-498B29E9EF07}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,22 @@
+flowchart TD
+  classDef ok fill:#EAF6EC,stroke:#2E7D32,color:#10311A
+  classDef bad fill:#FDEAEA,stroke:#B3261E,color:#410E0B
+  classDef st fill:#E8F1FB,stroke:#2F6DB5,color:#0B2545
+  A(["Inicio: el Worker arranca"]):::st --> B["Leer y validar appsettings.json<br/>(falla rápido si es inválido)"]
+  B --> C["Generar LoteId y cargar catálogos<br/>de clientes y productos"]
+  C --> D{"Fuentes habilitadas"}
+  D -->|"en paralelo (MaxDegreeOfParallelism)"| E1["Encuestas · CSV"]
+  D --> E2["Reseñas web · BD"]
+  D --> E3["Comentarios sociales · API"]
+  E1 & E2 & E3 --> F["Limpiar staging de la fuente"]
+  F --> G["Productor: extractor lee en streaming<br/>→ Channel acotado"]
+  G --> H["Consumidor: validar fila<br/>(NO se descarta; solo se registra)"]
+  H --> I["Agrupar en lote (BatchSize)"]
+  I --> J["INSERT parametrizado en stg_*<br/>+ hallazgos en etl_calidad_datos"]
+  J --> K{"¿Más datos?"}
+  K -->|Sí| G
+  K -->|No| L["Guardar resumen en etl_ejecucion<br/>(filas, hallazgos, ms)"]:::ok
+  G -. "error / API caída" .-> M["Reintento con backoff exponencial;<br/>si persiste: limpiar staging parcial<br/>y marcar fuente en ERROR"]:::bad
+  M --> L
+  L --> N{"¿Todas las fuentes terminaron?"}
+  N -->|Sí| O(["Log final y código de salida<br/>0 = OK · 1 = hubo errores"]):::st

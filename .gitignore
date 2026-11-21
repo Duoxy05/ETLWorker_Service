@@ -1,0 +1,8 @@
+bin/
+obj/
+.vs/
+*.user
+logs/
+src/ETLWorker.Worker/appsettings.Development.json
+secrets.json
+.env

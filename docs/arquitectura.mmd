@@ -1,0 +1,44 @@
+flowchart TB
+  classDef src fill:#E8F1FB,stroke:#2F6DB5,color:#0B2545
+  classDef core fill:#EAF6EC,stroke:#2E7D32,color:#10311A
+  classDef infra fill:#FFF4E0,stroke:#C77700,color:#4A2D00
+  classDef db fill:#F3E8FB,stroke:#7B3FA0,color:#2A1038
+  classDef cfg fill:#FDEAEA,stroke:#B3261E,color:#410E0B
+  classDef next fill:#F2F2F2,stroke:#888,color:#333,stroke-dasharray: 5 4
+
+  subgraph FUENTES["FUENTES DE DATOS"]
+    direction TB
+    CSV["CSV<br/>surveys_part1.csv<br/>(encuestas internas)"]:::src
+    REL[("BD relacional MySQL<br/>OpinionesOrigenDB<br/>web_reviews")]:::src
+    API["API REST<br/>/api/comments<br/>(redes sociales)"]:::src
+  end
+
+  subgraph WORKER["WORKER SERVICE .NET 8  (Clean Architecture)"]
+    direction TB
+    W["Worker<br/>EtlWorker + Program (DI, Serilog)"]:::core
+    APP["Application<br/>EtlOrchestrator · SourceExtractionPipeline<br/>OpinionValidator · IExtractor"]:::core
+    DOM["Domain<br/>RawOpinion · QualityIssue"]:::core
+    INF["Infrastructure<br/>CsvExtractor · DatabaseExtractor · ApiExtractor<br/>MySqlStagingRepository"]:::infra
+    W --> APP
+    APP --> DOM
+    INF -. implementa interfaces .-> APP
+  end
+
+  CFG["Configuración y secretos<br/>appsettings.json (fuentes, rutas)<br/>user-secrets / variables de entorno<br/>(contraseñas, API key)"]:::cfg
+
+  subgraph DW["BASE DE DATOS ANALÍTICA  (MySQL · SistemaOpinionesDW)"]
+    direction TB
+    STG[("stg_encuestas<br/>stg_resenas_web<br/>stg_comentarios_sociales")]:::db
+    LOG[("etl_calidad_datos<br/>etl_ejecucion")]:::db
+  end
+
+  TL["Transform + Load<br/>(siguiente etapa)<br/>dimensiones y hechos"]:::next
+  DASH["Dashboard / visualización<br/>(Power BI · siguiente etapa)"]:::next
+
+  CSV -->|CsvHelper| INF
+  REL -->|"ADO.NET · usuario solo lectura"| INF
+  API -->|"HttpClient · HTTPS/API key"| INF
+  CFG -.-> W
+  INF -->|"lotes parametrizados"| STG
+  INF -->|"hallazgos y métricas"| LOG
+  STG --> TL --> DASH
