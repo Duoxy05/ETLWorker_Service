@@ -12,7 +12,10 @@ public sealed class EtlOptions
     public int ChannelCapacity { get; set; } = 2000;
     /// <summary>0 = ejecutar una sola vez y terminar; &gt;0 = repetir cada N minutos.</summary>
     public int IntervalMinutes { get; set; } = 0;
+    /// <summary>true = extrae las fuentes a staging; false = solo carga dimensiones con el staging que ya existe.</summary>
+    public bool RunExtraction { get; set; } = true;
     public CatalogOptions Catalogs { get; set; } = new();
+    public DimensionOptions Dimensions { get; set; } = new();
     public List<SourceOptions> Sources { get; set; } = new();
 }
 
@@ -22,6 +25,36 @@ public sealed class CatalogOptions
     public string ClientesIdColumn { get; set; } = "IdCliente";
     public string? ProductosPath { get; set; }
     public string ProductosIdColumn { get; set; } = "IdProducto";
+
+    // Columnas usadas al cargar Dim_Cliente y Dim_Producto desde los catálogos.
+    public string ClientesNombreColumn { get; set; } = "Nombre";
+    public string ClientesEmailColumn { get; set; } = "Email";
+    public string ProductosNombreColumn { get; set; } = "Nombre";
+    public string ProductosCategoriaColumn { get; set; } = "Categoría";
+}
+
+/// <summary>Carga de las dimensiones del almacén de datos (sección "Etl:Dimensions").</summary>
+public sealed class DimensionOptions
+{
+    public bool Enabled { get; set; } = true;
+
+    /// <summary>Años que cubre Dim_Fecha (el modelo define el calendario 2024–2025).</summary>
+    public int CalendarStartYear { get; set; } = 2024;
+    public int CalendarEndYear { get; set; } = 2025;
+
+    /// <summary>Combinaciones Canal/Plataforma de Dim_Fuente.</summary>
+    public List<FuenteMapOptions> Fuentes { get; set; } = new();
+}
+
+/// <summary>
+/// Una fila (o grupo de filas) de Dim_Fuente. Si <see cref="Plataforma"/> viene fija se usa tal cual;
+/// si no, las plataformas se descubren en <see cref="StagingTable"/> (valores distintos de PlataformaRaw).
+/// </summary>
+public sealed class FuenteMapOptions
+{
+    public string Canal { get; set; } = "";
+    public string? Plataforma { get; set; }
+    public string? StagingTable { get; set; }
 }
 
 /// <summary>Una fuente de datos. Agregar una nueva = agregar un bloque en el JSON.</summary>

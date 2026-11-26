@@ -1,0 +1,37 @@
+digraph D {
+  rankdir=TB; newrank=true; compound=true;
+  graph [fontname="Helvetica", fontsize=20, labelloc=t, label="Flujo de la carga de dimensiones", pad=0.3, nodesep=0.22, ranksep=0.45, bgcolor="white"];
+  node  [fontname="Helvetica", fontsize=13, shape=box, style="rounded,filled", fillcolor="#F1F5F9", color="#475569", penwidth=1.3, margin="0.12,0.08"];
+  edge  [fontname="Helvetica", fontsize=11, color="#475569", penwidth=1.3];
+
+  subgraph cluster_src {
+    label="ORÍGENES"; style="rounded,filled"; fillcolor="#EFF6FF"; color="#2563EB"; fontname="Helvetica-Bold"; fontsize=13; fontcolor="#1D4ED8";
+    cat [label="clients.csv\nCsvHelper en\nstreaming", shape=note, fillcolor="#DBEAFE"];
+    prd [label="products.csv\nCsvHelper en\nstreaming", shape=note, fillcolor="#DBEAFE"];
+    stg [label="stg_encuestas y\nstg_comentarios_sociales\n(PlataformaRaw distintos)", shape=cylinder, fillcolor="#DBEAFE"];
+    gen [label="Calendario\n2024–2025\ngenerado por código", shape=note, fillcolor="#DBEAFE"];
+    fix [label="Valores fijos\ndel modelo", shape=note, fillcolor="#DBEAFE"];
+  }
+
+  subgraph cluster_t {
+    label="DimensionLoadOrchestrator: tras una extracción sin errores, LoteId nuevo y\n5 cargadores (un IDimensionLoader por dimensión) EN PARALELO"; style="rounded,filled"; fillcolor="#F0FDF4"; color="#16A34A"; fontname="Helvetica-Bold"; fontsize=13; fontcolor="#15803D";
+    lc [label="DimClienteLoader\nvalida ID, nombre,\nduplicados y correo\n+ miembros −1 y −2", fillcolor="#BBF7D0"];
+    lp [label="DimProductoLoader\nvalida ID, nombre\ny duplicados\n+ miembro −1", fillcolor="#BBF7D0"];
+    lf [label="DimFuenteLoader\ncanal + plataforma\n(configuración\n+ staging)", fillcolor="#BBF7D0"];
+    ld [label="DimFechaLoader\nAAAAMMDD, trimestre,\nmes y nombre\n+ miembro −1", fillcolor="#BBF7D0"];
+    ls [label="DimSentimientoLoader\n1 Positiva (+1)\n2 Neutra (0)\n3 Negativa (−1)", fillcolor="#BBF7D0"];
+  }
+
+  rep [label="MySqlDimensionRepository (usuario etl_loader: solo EXECUTE)\nSerializa las filas a JSON y llama al procedimiento\n(CommandType.StoredProcedure, parámetro p_filas)\nLee p_insertadas, p_existentes, p_codigo y p_result", fillcolor="#FED7AA", color="#EA580C"];
+  sp  [label="Procedimiento almacenado MySQL (una TRANSACCIÓN)\nusp_LoadCliente · usp_LoadProducto · usp_LoadFuente\nusp_LoadFecha · usp_LoadSentimiento\nJSON_TABLE expande las filas · COUNT(*) revisa si ya existen\nSi existe: NO inserta → \"SE ENCUENTRA REGISTRADA\" (código 1)", fillcolor="#FDE68A", color="#CA8A04"];
+  dw  [label="SistemaOpinionesDW\nDim_Cliente · Dim_Producto · Dim_Fuente\nDim_Fecha · Dim_Sentimiento", shape=cylinder, fillcolor="#FFEDD5", color="#EA580C"];
+  bit [label="etl_carga_dimensiones\n(una fila por dimensión\ny por ejecución)", shape=cylinder, fillcolor="#EDE9FE", color="#7C3AED"];
+  err [label="Si una dimensión falla: el procedimiento hace\nROLLBACK y devuelve código −1; se registra\nel error y las demás continúan", fillcolor="#FECACA", color="#DC2626"];
+  fin [label="Resumen en el log (Serilog) · código de salida 0 / 1\nSiguiente fase: carga de Fact_Opiniones", shape=oval, fillcolor="#EDE9FE", color="#7C3AED"];
+
+  cat -> lc; prd -> lp; stg -> lf; gen -> ld; fix -> ls;
+  lc -> rep; lp -> rep; lf -> rep; ld -> rep; ls -> rep;
+  rep -> sp [label="CALL"]; sp -> dw; sp -> rep [style=dashed, label="OUT: código y mensaje"];
+  rep -> bit; sp -> err [style=dashed, color="#DC2626", label="error"];
+  dw -> fin; bit -> fin; err -> fin [style=dashed];
+}

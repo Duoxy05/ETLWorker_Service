@@ -1,3 +1,4 @@
+using ETLWorker.Application.Dimensions;
 using ETLWorker.Application.Services;
 using ETLWorker.Application.Settings;
 using ETLWorker.Domain.Enums;
@@ -5,9 +6,13 @@ using Microsoft.Extensions.Options;
 
 namespace ETLWorker.Worker;
 
-/// <summary>Host del proceso: ejecuta la extracción una vez (IntervalMinutes = 0) o periódicamente.</summary>
+/// <summary>
+/// Host del proceso. En cada ejecución: (1) extrae las fuentes a staging y (2) carga las dimensiones del
+/// almacén de datos. Corre una vez (IntervalMinutes = 0) o periódicamente.
+/// </summary>
 public sealed class EtlWorker(
     EtlOrchestrator orchestrator,
+    DimensionLoadOrchestrator dimensionOrchestrator,
     IOptions<EtlOptions> options,
     IHostApplicationLifetime lifetime,
     ILogger<EtlWorker> logger) : BackgroundService
@@ -19,8 +24,7 @@ public sealed class EtlWorker(
         {
             do
             {
-                var results = await orchestrator.RunAsync(stoppingToken);
-                if (results.Any(r => r.Estado != ExtractionStatus.Ok)) Environment.ExitCode = 1;
+                await RunOnceAsync(stoppingToken);
                 if (interval <= 0) break;
 
                 logger.LogInformation("Próxima ejecución en {Minutos} min.", interval);
@@ -40,5 +44,38 @@ public sealed class EtlWorker(
         {
             if (interval <= 0) lifetime.StopApplication();
         }
+    }
+
+    private async Task RunOnceAsync(CancellationToken ct)
+    {
+        var cfg = options.Value;
+        var extractionOk = true;
+
+        // Etapa 1: extracción (E) a las tablas stg_*.
+        if (cfg.RunExtraction)
+        {
+            var results = await orchestrator.RunAsync(ct);
+            extractionOk = results.All(r => r.Estado == ExtractionStatus.Ok);
+            if (!extractionOk) Environment.ExitCode = 1;
+        }
+        else
+        {
+            logger.LogInformation("Extracción omitida por configuración (Etl:RunExtraction = false): se usa el staging existente.");
+        }
+
+        // Etapa 2: carga de dimensiones. Si la extracción falló, el staging puede estar incompleto: no se continúa.
+        if (!cfg.Dimensions.Enabled)
+        {
+            logger.LogInformation("Carga de dimensiones deshabilitada por configuración.");
+            return;
+        }
+        if (!extractionOk)
+        {
+            logger.LogWarning("Se omite la carga de dimensiones porque la extracción terminó con errores.");
+            return;
+        }
+
+        var loads = await dimensionOrchestrator.RunAsync(ct);
+        if (loads.Any(l => l.Estado != LoadStatus.Ok)) Environment.ExitCode = 1;
     }
 }

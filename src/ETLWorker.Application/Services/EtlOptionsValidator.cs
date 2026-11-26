@@ -48,6 +48,27 @@ public sealed class EtlOptionsValidator : IValidateOptions<EtlOptions>
                     break;
             }
         }
+
+        if (!o.RunExtraction && !o.Dimensions.Enabled)
+            e.Add("Etl:RunExtraction y Etl:Dimensions:Enabled están ambos en false: no habría nada que ejecutar.");
+
+        var d = o.Dimensions;
+        if (d.Enabled)
+        {
+            if (d.CalendarStartYear < 1901 || d.CalendarEndYear > 2100 || d.CalendarStartYear > d.CalendarEndYear)
+                e.Add("Etl:Dimensions: CalendarStartYear/CalendarEndYear deben estar entre 1901 y 2100 y el inicio no puede superar al fin.");
+            if (d.Fuentes.Count == 0) e.Add("Etl:Dimensions:Fuentes no puede estar vacío.");
+
+            for (var i = 0; i < d.Fuentes.Count; i++)
+            {
+                var f = d.Fuentes[i];
+                var p = $"Etl:Dimensions:Fuentes[{i}]";
+                if (string.IsNullOrWhiteSpace(f.Canal)) e.Add($"{p}.Canal es obligatorio.");
+                if (string.IsNullOrWhiteSpace(f.Plataforma) && !StagingTableName.IsValid(f.StagingTable))
+                    e.Add($"{p}: indique Plataforma fija o una StagingTable válida (^stg_[a-z0-9_]+$) de donde descubrirla.");
+            }
+        }
+
         return e.Count == 0 ? ValidateOptionsResult.Success : ValidateOptionsResult.Fail(e);
     }
 }

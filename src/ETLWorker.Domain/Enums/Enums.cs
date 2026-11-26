@@ -7,3 +7,6 @@ public enum SourceType { Csv, Database, Api }
 public enum IssueSeverity { Advertencia, Error }
 
 public enum ExtractionStatus { Ok, Error }
+
+/// <summary>Resultado de la carga de una dimensión del almacén de datos.</summary>
+public enum LoadStatus { Ok, Error }

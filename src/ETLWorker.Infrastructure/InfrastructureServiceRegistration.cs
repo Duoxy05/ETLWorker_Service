@@ -1,6 +1,7 @@
 using ETLWorker.Application.Abstractions;
 using ETLWorker.Application.Settings;
 using ETLWorker.Domain.Enums;
+using ETLWorker.Infrastructure.Dimensions;
 using ETLWorker.Infrastructure.Extractors;
 using ETLWorker.Infrastructure.Staging;
 using Microsoft.Extensions.Configuration;
@@ -42,6 +43,11 @@ public static class InfrastructureServiceRegistration
         services.AddSingleton<IExtractor, ApiExtractor>();
         services.AddSingleton<IStagingRepository, MySqlStagingRepository>();
         services.AddSingleton<IReferenceCatalogProvider, CsvReferenceCatalogProvider>();
+
+        // Carga de dimensiones del almacén de datos
+        services.AddSingleton<ICatalogSource, CsvCatalogSource>();
+        services.AddSingleton<IStagingReader, MySqlStagingReader>();
+        services.AddSingleton<IDimensionRepository, MySqlDimensionRepository>();
         return services;
     }
 }

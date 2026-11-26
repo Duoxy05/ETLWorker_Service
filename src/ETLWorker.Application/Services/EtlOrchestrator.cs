@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using ETLWorker.Application.Abstractions;
+using ETLWorker.Application.Dimensions;
 using ETLWorker.Application.Settings;
 using ETLWorker.Domain.Entities;
 using ETLWorker.Domain.Enums;
@@ -78,6 +79,14 @@ public static class ApplicationServiceRegistration
     {
         services.AddSingleton<SourceExtractionPipeline>();
         services.AddSingleton<EtlOrchestrator>();
+
+        // Carga de dimensiones: un IDimensionLoader por dimensión (agregar otra = agregar una clase y una línea aquí).
+        services.AddSingleton<IDimensionLoader, DimClienteLoader>();
+        services.AddSingleton<IDimensionLoader, DimProductoLoader>();
+        services.AddSingleton<IDimensionLoader, DimFuenteLoader>();
+        services.AddSingleton<IDimensionLoader, DimFechaLoader>();
+        services.AddSingleton<IDimensionLoader, DimSentimientoLoader>();
+        services.AddSingleton<DimensionLoadOrchestrator>();
         return services;
     }
 }
